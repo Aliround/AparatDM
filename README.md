@@ -20,7 +20,7 @@ The application also supports multi-threaded downloads, quality selection, and p
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/AparatDM.git
+   git clone https://github.com/Aliround/AparatDM.git
    cd AparatDM
    ```
 
@@ -42,8 +42,8 @@ The program will automatically recognize and add it to the download queue.
 
 3. Use the GUI to manage your downloads. You can start, pause, or cancel downloads as needed.
 
-4. You can select the default video quality for the videos you are going to add at the top.
-or you can change the quality individualy for every video
+4. In the top panel you can select the default video quality for the videos you are going to add.
+Or you can change the quality individualy for every video
 
 5. You can change the default path as well
 
@@ -81,6 +81,6 @@ Contributions are welcome! Feel free to open issues or submit pull requests to i
 
 ## License
 
-I am new here just use it and send salawat and dua for me.
+I am new here just use it and send salawat and dua for me ❤️.
 
 
