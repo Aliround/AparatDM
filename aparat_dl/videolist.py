@@ -33,7 +33,7 @@ class VideoList():
             
             elif len(link.replace('https://www.aparat.com/', '')) > 3:
                 created_videos.extend(self.fetch_channel(link.split('/')[-1], 0))
-            self.save_data()
+            self.save_videos()
         else:
             print('link is invalid!!!')
         return created_videos
@@ -111,7 +111,7 @@ class VideoList():
             thread.start()
         for thread in threads:
             thread.join()
-        self.save_data()
+        self.save_videos()
         print('links are ready')
     
     def fetch_mirror_urls(self):
@@ -126,24 +126,24 @@ class VideoList():
             thread.start()
         for thread in threads:
             thread.join()
-        self.save_data()
+        self.save_videos()
         print('mirror urls are ready')
 
     def start_queue(self):
         if self.save:
-            self.save_data()
+            self.save_videos()
         for vid in self.Videos:
             if not vid.completed:
                 vid.download()
-            self.save_data()
+            self.save_videos()
     
     def start_all(self):
         if self.save:
-            self.save_data()
+            self.save_videos()
         for vid in self.Videos:
             if vid.status == 'stop':
                 vid.download()
-            self.save_data()
+            self.save_videos()
         
     def show(self):
         for i, vid in enumerate(self.Videos):
@@ -165,11 +165,18 @@ class VideoList():
         for vid in self.Videos:
             vid.get_thumbnail_image()
     
-    def save_data(self):
-        with open('data\\' + self.name, 'wb') as f:
-            pickle.dump(self, f)
+    def save_videos(self):
+        data = {
+            'quality': self.quality,
+            'dest': self.dest,
+            'Videos': self.Videos
+        }
+        with open('data\\' + self.name + '.pkl', 'wb') as f:
+            pickle.dump(data, f)
 
-    @classmethod
-    def load_data(cls, filename):
-        with open('data\\' + filename, 'rb') as f:
-            return pickle.load(f)
+    def load_videos(self):
+        with open('data\\' + self.name + '.pkl', 'rb') as f:
+            data = pickle.load(f)
+            self.quality = data['quality']
+            self.dest = data['dest']
+            self.Videos = data['Videos']
