@@ -1,7 +1,7 @@
 import re
 from time import sleep
 
-default_path = r"F:\Video\Game\RIP"
+default_path = r"C:\Aparat downloaded videos"
 
 def sec_to_time(seconds):
     try:
