@@ -15,7 +15,7 @@ from pypdl import Pypdl
 from concurrent.futures import CancelledError
 
 
-class Vid_box():
+class VideoTile():
     def __init__(self, app:object, video:object):
         self.video = video
         self.dest = video.dest
@@ -49,10 +49,13 @@ class Vid_box():
     def download(self):
         name = self.title + '.mp4'
         url = self.video.dlinks[self.quality]
+        if not os.path.exists(self.dest):
+            print('Directory does not exist - making directory')
+            os.makedirs(self.dest)
         try:
             self.dl.start(url, os.path.join(self.dest, name), retries=3, mirrors=self.video.mirror_urls, display=False)
         except CancelledError:
-            print(f"{self.title} - Download cancelled.")
+            pass
         self.running = False
         self.queue = False
 
@@ -151,13 +154,13 @@ class Vid_box():
             self.down_frame = tb.Frame(self.info_frame, bootstyle='dark')
             self.down_frame.pack(expand=True, fill='x')
 
-            self.size_lable = tb.Label(self.down_frame, text=f'Size: {self.size} Mb', background='grey19')
+            self.size_lable = tb.Label(self.down_frame, text=f'Size: {self.size} Mb', background='grey19', foreground='orange')
             self.size_lable.pack(side='left', pady=(0, 3), fill='both', expand=True)
 
             qu_values = ['1080p', '720p', '480p', '360p', '240p', '144p']
             self.quality_box = tb.Combobox(self.down_frame, values=qu_values, width=8, state='readonly', bootstyle='success')
             self.quality_box.current(qu_values.index(self.quality))
-            self.quality_box.pack(side='left', padx=5, pady=(0,8), anchor='w', expand=True)
+            self.quality_box.pack(side='right', padx=5, pady=(0,8), anchor='e', expand=True)
             self.quality_box.bind("<<ComboboxSelected>>", self.update_quality)
 
             self.path_frame = tb.Frame(self.frame, bootstyle = 'dark')
@@ -242,52 +245,42 @@ class App():
     def draw(self):
         panel = tb.Frame(self.root)
         panel.pack(fill='x')
+
         self.vid_list_frame_border.pack(expand=True, fill='both', padx=8, pady=(0,8))
         self.vlist.pack(expand=True, fill='both', padx=(0,5))
 
-        ssframe = tb.Frame(panel)
-        ssframe.pack(side='left', fill='y')
-        start_all_btn = tb.Button(ssframe, text='Start all', bootstyle = 'success-outline', command=self.start_all)
-        start_all_btn.pack(padx=10, pady=(10,5))
-        stop_all_btn = tb.Button(ssframe, text='Stop all', bootstyle = 'danger-outline', command=self.stop_all)
-        stop_all_btn.pack(padx=10, pady=(5,10))
+        #! panel frame
+        top_frame = tb.Frame(panel)
+        bottom_frame = tb.Frame(panel)
+        top_frame.pack(fill="x", expand=True)
+        bottom_frame.pack(fill="x", expand=True)
 
-        inp_frame = tb.Frame(panel)
-        inp_frame.pack(side='left', fill='both', expand=True)
-
-        path_frame = tb.Frame(inp_frame)
-        path_frame.pack(fill='both', expand=True)
-        button_frame = tb.Frame(inp_frame)
-        button_frame.pack(fill='both', expand=True)
-
-        path_txt = tb.Label(path_frame, text='Path')
-        path_txt.pack(side='left', padx=2)
-        path_input = tb.Entry(path_frame)
-        path_input.pack(side='left', padx=(0, 10), pady=(5,10), expand=True, fill='x')
-
-        clear_all = tb.Button(button_frame, text='Clear all', command=self.clear_all, style='warning-outline')
-        clear_all.pack(side='left', padx=10)
-        
-        add_frame = tb.Frame(panel)
-        add_frame.pack(side='left', fill='y', padx=(0,10))
+        path_txt = tb.Label(top_frame, text='Path :')
+        path_txt.pack(side='left', padx=10)
+        self.path_input = tb.Entry(top_frame, bootstyle='info')
+        self.path_input.insert(0, default_path)  # Add default text
+        self.path_input.pack(side='left', pady=5, expand=True, fill='x')
 
         qu_values = ['1080p', '720p', '480p', '360p', '240p', '144p']
-        self.quality_choose = tb.Combobox(add_frame, values=qu_values, width=8, state='readonly', bootstyle='success')
-        self.quality_choose.pack(pady=(10,5))
+        self.quality_choose = tb.Combobox(top_frame, values=qu_values, width=8, state='readonly', bootstyle='info')
+        self.quality_choose.pack(padx=10, pady=5, side='left')
         self.quality_choose.current(1)
 
-        add_btn = tb.Button(add_frame, text='Add', width=8, bootstyle = 'success')
-        add_btn.pack(pady=(5,10))
+        #? panel buttom frame
+        start_all_btn = tb.Button(bottom_frame, text='Start all', bootstyle = 'success-outline', command=self.start_all)
+        start_all_btn.pack(side="left", padx=(10), pady=5)
+        stop_all_btn = tb.Button(bottom_frame, text='Stop all', bootstyle = 'danger-outline', command=self.stop_all)
+        stop_all_btn.pack(side="left", pady=5)
 
-        get_d_frame = tb.Frame(panel)
-        get_d_frame.pack(side='left', fill='both')
+        get_dlink_btn = tb.Button(bottom_frame, text="Get mirror links", style='light-outline', width=16, command=self.get_mirror_link)
+        get_dlink_btn.pack(side="right", padx=10, pady=5)
 
-        get_dlink_btn = tb.Button(get_d_frame, text="Get download link", style='success-outline', width=16, command=self.get_mirror_link)
-        get_dlink_btn.pack(padx=(0,8), pady=10)
+        clear_all = tb.Button(bottom_frame, text='Clear all', command=self.clear_all, style='warning-outline')
+        clear_all.pack(side="right", pady=5)
 
-        clear_btn = tb.Button(get_d_frame, text="Clear finished", style='success-outline', width=16, command=self.clear_finished)
-        clear_btn.pack(padx=(0,8))
-    
+        clear_finished_btn = tb.Button(bottom_frame, text="Clear finished", style='light-outline', width=16, command=self.clear_finished)
+        clear_finished_btn.pack(side="right", padx=(10), pady=5)
+
     def start_all(self):
         for vidbox in self.video_list:
             if not vidbox.completed:
@@ -313,23 +306,23 @@ class App():
         for widget in self.vlist.winfo_children():
             widget.destroy()
     
-    def add_video_box(self, vid_box:object):
-        self.video_list.append(vid_box)
-        vid_box.draw()
+    def add_video_box(self, vid_tile:object):
+        self.video_list.append(vid_tile)
+        vid_tile.draw()
 
     def load_videos(self):
         try:
             self.vl = VideoList(name='Download_list')
             self.vl.load_videos()
             for vid in self.vl.Videos:
-                vid_box = Vid_box(self, vid)
-                self.add_video_box(vid_box)
+                vid_tile = VideoTile(self, vid)
+                self.add_video_box(vid_tile)
         except Exception as e:
             print(f"loading videos: {e}")
             self.vl = VideoList(name='Download_list')
             self.vl.save = True
             for vid in self.vl.Videos:
-                self.add_video_box(Vid_box(self, vid))
+                self.add_video_box(VideoTile(self, vid))
     
     def run(self):
         self.draw()
@@ -354,14 +347,16 @@ class App():
         for video in new_videos:
             if video.thumb_img is None:
                 video.get_thumbnail_image()
-            vid_box = Vid_box(self, video)
-            self.add_video_box(vid_box)
+            vid_tile = VideoTile(self, video)
+            self.add_video_box(vid_tile)
 
     def listen_for_clipboard(self):
         tmp_value = pyperclip.paste()
         if (tmp_value != self.recent_value):
             if 'https://www.aparat.com/' in tmp_value:
                 self.vl.quality = self.quality_choose.get()
+                self.vl.dest = self.path_input.get().removesuffix('\\')
+                print(self.vl.dest)
                 self.recent_value = tmp_value
                 t2 = Thread(target=self.add_url, args=[tmp_value])
                 t2.daemon = True
