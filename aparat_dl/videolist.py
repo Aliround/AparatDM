@@ -4,6 +4,7 @@ import re
 import pickle
 from aparat_dl import Video
 from aparat_dl.utils import *
+import os
 
 
 class VideoList():
@@ -171,12 +172,17 @@ class VideoList():
             'dest': self.dest,
             'Videos': self.Videos
         }
+        if not os.path.exists('data'):
+            os.makedirs('data')
         with open('data\\' + self.name + '.pkl', 'wb') as f:
             pickle.dump(data, f)
 
     def load_videos(self):
-        with open('data\\' + self.name + '.pkl', 'rb') as f:
-            data = pickle.load(f)
-            self.quality = data['quality']
-            self.dest = data['dest']
-            self.Videos = data['Videos']
+        try:
+            with open('data\\' + self.name + '.pkl', 'rb') as f:
+                data = pickle.load(f)
+                self.quality = data['quality']
+                self.dest = data['dest']
+                self.Videos = data['Videos']
+        except:
+            pass
