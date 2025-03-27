@@ -52,35 +52,35 @@ class Vid_box():
         try:
             self.dl.start(url, os.path.join(self.dest, name), retries=3, mirrors=self.video.mirror_urls, display=False)
         except CancelledError:
-            print("Download was cancelled.")
+            print(f"{self.title} - Download cancelled.")
         self.running = False
         self.queue = False
 
     def add_to_queue(self):
         self.queue = True
-        self.spr_btn.configure(text='Pending', bootstyle='info', command=self.remove_from_queue)
+        self.spr_btn.configure(text='Pending', bootstyle='info', command=self.stop)
         if not self.app.downloading:
             self.app.start_download()
     
-    def remove_from_queue(self):
-        self.queue = False
-        self.spr_btn.configure(text='Start', bootstyle='success-outline', command=self.add_to_queue)
-        
     def stop(self):
-        try:
+        if self.queue and self.running:
             try:
-                self.size = round(self.dl.size / (1024 ** 2), 2)
-                self.video.size = self.size
-            except:
-                self.size = self.video.size
-            self.video.progress = self.progress
-            self.dl.stop()
-            self.spr_btn.configure(text="start", bootstyle='success-outline', command=self.add_to_queue)
-            self.running = False
+                try:
+                    self.size = round(self.dl.size / (1024 ** 2), 2)
+                    self.video.size = self.size
+                except:
+                    self.size = self.video.size
+                self.video.progress = self.progress
+                self.dl.stop()
+                self.spr_btn.configure(text="start", bootstyle='success-outline', command=self.add_to_queue)
+                self.running = False
+                self.queue = False
+            except Exception as e:
+                print('stop error:', e)
+        elif self.queue and not self.running:
             self.queue = False
-        except Exception as e:
-            print('stop error:', e)
-        
+            self.spr_btn.configure(text='Start', bootstyle='success-outline', command=self.add_to_queue)
+            
     def delete(self):
         if self.running:
             self.stop()
@@ -231,14 +231,13 @@ class App():
     def download_videos(self):
         while self.downloading:
             for vidbox in self.video_list:
-                if vidbox.queue:
+                if vidbox.queue and self.downloading:
                     vidbox.start()
-                    while vidbox.queue:
+                    while vidbox.queue and self.downloading:
                         sleep(0.5)
-            if all(not x.queue for x in self.video_list):
+            if not any(vidbox.queue for vidbox in self.video_list):
                 self.downloading = False
-        self.downloading = False
-        print('download finished')
+        print('Download process completed')
         
     def draw(self):
         panel = tb.Frame(self.root)
@@ -268,10 +267,6 @@ class App():
 
         clear_all = tb.Button(button_frame, text='Clear all', command=self.clear_all, style='warning-outline')
         clear_all.pack(side='left', padx=10)
-        save_btn = tb.Button(button_frame, text='Save', command=self.save)
-        save_btn.pack(side='left', padx=10)
-        but3 = tb.Button(button_frame, text='button 3')
-        but3.pack(side='left', padx=10)
         
         add_frame = tb.Frame(panel)
         add_frame.pack(side='left', fill='y', padx=(0,10))
@@ -302,15 +297,9 @@ class App():
             self.downloading=True
     
     def stop_all(self):
-        for vidbox in self.video_list:
-            try:
-                if vidbox.queue and vidbox.running:
-                    vidbox.stop()
-                if vidbox.queue and not vidbox.running:
-                    vidbox.remove_from_queue()
-            except:
-                vidbox.remove_from_queue()
         self.downloading = False
+        for vidbox in self.video_list:
+            vidbox.stop()
     
     def clear_finished(self):
         new_list = [vid for vid in self.vl.Videos if not vid.completed]
