@@ -122,7 +122,7 @@ class VideoTile():
                 self.app.root.after(100, self.update_tile)
             elif self.completed:
                 self.bar['value'] = 100
-                self.spr_btn.configure(text='Finished', bootstyle='light', command=None, state='disabled')
+                self.spr_btn.configure(text='Open', bootstyle='light', command=self.open_video)
                 self.queque = False
                 self.app.save()
             elif not self.running:
@@ -131,6 +131,8 @@ class VideoTile():
             print('update_tile error:', e)
     
     def draw(self):
+        # update dest
+        self.dest = os.path.join(self.dest, self.video.playlist)
         try:
             self.frame = tb.Frame(self.app.vlist, bootstyle = 'dark')
             self.frame.pack(expand=True, fill='x', padx=(5, 15), pady=4)
@@ -192,7 +194,7 @@ class VideoTile():
             self.btn_frame.pack(fill='y', expand=True)
             
             if self.completed:
-                self.spr_btn = tb.Button(self.btn_frame, text="Finished", width=8, bootstyle= 'light')
+                self.spr_btn = tb.Button(self.btn_frame, text="Open", width=8, bootstyle= 'light', command=self.open_video)
                 self.spr_btn.pack(padx=10, pady=(15,8))
             else:
                 self.spr_btn = tb.Button(self.btn_frame, text="Start", width=8, bootstyle= 'success-outline', command=self.add_to_queue)
@@ -203,12 +205,18 @@ class VideoTile():
         except Exception as e:
             print(e)
 
+    def open_video(self):
+        path = os.path.join(self.dest, self.title + '.mp4')
+        if os.path.exists(path):
+            os.startfile(path)
+        else:
+            print(f"File does not exist: {path}")
+
     def update_quality(self, event):
         self.video.quality = self.quality_box.get()
     
     def update_path(self):
         self.video.dest = self.path_var.get()
-
 
 class App():
     def __init__(self):

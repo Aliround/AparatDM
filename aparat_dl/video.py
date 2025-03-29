@@ -13,7 +13,7 @@ class Video():
         self.thumb_img = None
         self.duration = None
         self.dlinks = {}
-        self.playlist = None
+        self.playlist = ''
         self.mirror_urls = []
         self.completed = False
         self.progress = 0
