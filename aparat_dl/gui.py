@@ -159,7 +159,7 @@ class VideoTile():
             self.size_lable = tb.Label(self.down_frame, text=f'Size: {self.size} Mb', background='grey19', foreground='orange')
             self.size_lable.pack(side='left', pady=(0, 3), fill='both', expand=True)
 
-            qu_values = ['1080p', '720p', '480p', '360p', '240p', '144p']
+            qu_values = list(self.video.dlinks.keys())
             self.quality_box = tb.Combobox(self.down_frame, values=qu_values, width=8, state='readonly', bootstyle='success')
             self.quality_box.current(qu_values.index(self.quality))
             self.quality_box.pack(side='right', padx=5, pady=(0,8), anchor='e', expand=True)
