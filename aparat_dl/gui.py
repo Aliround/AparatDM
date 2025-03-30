@@ -131,8 +131,6 @@ class VideoTile():
             print('update_tile error:', e)
     
     def draw(self):
-        # update dest
-        self.dest = os.path.join(self.dest, self.video.playlist)
         try:
             self.frame = tb.Frame(self.app.vlist, bootstyle = 'dark')
             self.frame.pack(expand=True, fill='x', padx=(5, 15), pady=4)

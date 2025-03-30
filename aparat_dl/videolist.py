@@ -55,8 +55,9 @@ class VideoList():
                     title = format_filename(vid["attributes"]["title"])
                     link = "https://www.aparat.com/v/" + vid["attributes"]['frame'].split('/')[-3]
                     if not self.is_duplicate(link):
-                        video = Video(link, self.quality, self.dest)
-                        video.playlist = format_filename(self.playlist) 
+                        playlist = format_filename(self.playlist)
+                        video = Video(link, self.quality, os.path.join(self.dest, playlist))
+                        video.playlist = playlist
                         video.fetch_download_link()
                         self.Videos.append(video)
                         created_videos.append(video)
@@ -90,7 +91,7 @@ class VideoList():
             title = vid["title"]
             link = "https://www.aparat.com/v/" + vid['frame'].split('/')[-3]
             if not self.is_duplicate(link):
-                video = Video(link, self.quality, self.dest)
+                video = Video(link, self.quality, os.path.join(self.dest, UserID))
                 video.playlist = UserID
                 video.fetch_download_link()
                 self.Videos.append(video)
